@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chromebook Roulette</title>
     <script>
+        // Check if the current URL is the correct one
+        if (window.location.href !== "https://dumzdev.github.io/ChromebookRoulette/") {
+            // Wait for 5 seconds before opening the correct URL in a new tab
+            setTimeout(() => {
+                window.open("https://dumzdev.github.io/ChromebookRoulette/", "_blank");
+            }, 5000); // Delay of 5000ms (5 seconds)
+        }
+
         const apiUrl = "https://sheetdb.io/api/v1/d6desiq4gglnm";
 
         async function getIPData() {
